@@ -1,30 +1,30 @@
 import React,{useState,useEffect} from 'react';
 import Navbar from '../components/Navbar.tsx';
 import Todo from '../components/Todo.tsx';
-import firestore from '../firebase/firebase.js';
-import {collection,onSnapshot} from 'firebase/firestore';
 
-const Home = () =>{
 
-  //state to store data
-  const [todos, setTodos] = useState(false)
+
+export async function getServerSideProps(){
+  const todos = await fetch("http://localhost:3000/api/fetchTodos")
+  const todosJson = await todos.json();
+
+  return{
+    props:{
+      data:{
+        todosJson
+      }
+    }
+  }
+}
+
+const Home = ({data}) =>{
+
+  console.log(data.todosJson.todo);
+
 
 
   //useEffect hook to fetch data
 
-  useEffect(() =>{
-    //fetching data from firestore database
-
-   const fetchData = async() =>{
-    const collectionRef = await collection(firestore,'todos');
-    onSnapshot(collectionRef,(snapshot) =>{
-      setTodos(snapshot.docs.map((doc) => doc.data()))
-    })
-    
-  }
-
-  fetchData();
-  },[])
   return(
     <div className="">
         <div className="">
@@ -32,16 +32,9 @@ const Home = () =>{
         </div>
         <div className="todo-master-container">
             {
-
-              (
-                todos?
-                todos.map((todo) =>(
-                  <Todo key={todo.id} data={todo.task}/>
-                ))
-                :
-                <h1>Loading data......</h1>
-              )
-              
+              data.todosJson.todo.map((data) =>(
+                <Todo key={data.id} data={data.task}/>
+              ))
             }
         </div>
     </div>
